@@ -3,140 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>乙女カウンター</title>
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/e91e63/ffffff?text=乙女">
+    <title>乙女4 設定判別</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-primary: #ffffff;
-            --accent: #e91e63;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 10px;
-            user-select: none; /* テキスト選択防止 */
-            -webkit-user-select: none;
-        }
-        h2 { text-align: center; color: var(--accent); margin: 10px 0; font-size: 1.2rem; }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .counter-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid #333;
-            active-state: scale(0.95);
-        }
-
-        .label { font-size: 0.85rem; color: #aaa; margin-bottom: 5px; height: 2.4em; display: flex; align-items: center; justify-content: center; }
-        .count { font-size: 2rem; font-weight: bold; margin: 5px 0; color: var(--text-primary); }
-        
-        /* ボタン色分け */
-        .btn-normal { border-left: 5px solid #2196f3; }
-        .btn-attack { border-left: 5px solid #ff9800; }
-        .btn-syutsugeki { border-left: 5px solid #f44336; }
-
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        button.reset {
-            background: #444;
-            color: #fff;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            flex: 1;
-            font-size: 0.9rem;
-        }
+        :root { --bg: #121212; --card: #1e1e1e; --accent: #e91e63; --text: #fff; --sub: #aaa; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; -webkit-user-select: none; padding-bottom: 100px; }
+        h3 { border-left: 4px solid var(--accent); padding-left: 10px; font-size: 1rem; margin: 20px 0 10px 0; color: #eee; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .card { background: var(--card); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid #333; cursor: pointer; }
+        .card:active { background: #333; }
+        .label { font-size: 0.75rem; color: var(--sub); margin-bottom: 5px; min-height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .count { font-size: 1.8rem; font-weight: bold; font-family: 'Courier New', monospace; }
+        .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+        .neg-btn { background: #2a2a2a; border: 1px solid #444; color: #888; padding: 12px 0; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .neg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .reset-area { margin-top: 40px; text-align: center; }
+        .reset-btn { background: #d32f2f; color: white; border: none; padding: 12px 24px; border-radius: 4px; font-size: 0.9rem; }
+        .help { font-size: 0.7rem; color: #666; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h2>戦国乙女 カウンター</h2>
+<h3>● 通常時</h3>
+<div class="grid">
+    <div class="card" onclick="up('g_total', 10)"><div class="label">通常時消化ゲーム数</div><div id="g_total" class="count">0</div></div>
+    <div class="card" onclick="up('bonus_at')"><div class="label">ボーナス＋AT初当たり</div><div id="bonus_at" class="count">0</div></div>
+    <div class="card" onclick="up('at_hit')"><div class="label">AT初当たり</div><div id="at_hit" class="count">0</div></div>
+</div>
 
-    <div class="grid">
-        <div class="counter-card btn-normal" onclick="countUp('normal')" oncontextmenu="countDown(event, 'normal')">
-            <div class="label">通常時合計</div>
-            <div id="normal" class="count">0</div>
-        </div>
+<h3>● 乙女アタック</h3>
+<div class="grid">
+    <div class="card" onclick="up('attack_hit')"><div class="label">乙女アタック当選</div><div id="attack_hit" class="count">0</div></div>
+</div>
 
-        <div class="counter-card btn-attack" onclick="countUp('attack')" oncontextmenu="countDown(event, 'attack')">
-            <div class="label">乙女アタック</div>
-            <div id="attack" class="count">0</div>
-        </div>
+<h3>● 巫女カウンター</h3>
+<div class="grid">
+    <div class="card" onclick="up('miko_zero')"><div class="label">巫女カウンター<br>0pt到達数</div><div id="miko_zero" class="count">0</div></div>
+    <div class="card" onclick="up('miko_attack')"><div class="label">0pt到達時の<br>乙女アタック当選</div><div id="miko_attack" class="count">0</div></div>
+</div>
 
-        <div class="counter-card btn-syutsugeki" onclick="countUp('syutsugeki')" oncontextmenu="countDown(event, 'syutsugeki')">
-            <div class="label">乙女出撃チャンス</div>
-            <div id="syutsugeki" class="count">0</div>
-        </div>
+<h3>● 通常状態のAT直撃抽選</h3>
+<div class="grid">
+    <div class="card" onclick="up('chokugeki')"><div class="label">AT直撃当選<br>(超強カワループ除く)</div><div id="chokugeki" class="count">0</div></div>
+</div>
 
-        <div class="counter-card" style="border-left: 5px solid #4caf50;" onclick="countUp('success')" oncontextmenu="countDown(event, 'success')">
-            <div class="label">AT直撃</div>
-            <div id="success" class="count">0</div>
-        </div>
-    </div>
+<h3>● ボーナス継続G数(昇格非当選時)</h3>
+<div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+    <div class="card" onclick="up('g30')"><div class="label">30G</div><div id="g30" class="count">0</div></div>
+    <div class="card" onclick="up('g40')"><div class="label">40G</div><div id="g40" class="count">0</div></div>
+    <div class="card" onclick="up('g50')"><div class="label">50G</div><div id="g50" class="count">0</div></div>
+</div>
 
-    <div style="font-size: 0.7rem; color: #666; text-align: center;">
-        ※タップで+1 / 長押しで-1
-    </div>
+<h3>● オウガイバトル</h3>
+<div class="grid">
+    <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイバトル回数</div><div id="ougai_cnt" class="count">0</div></div>
+    <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利回数</div><div id="ougai_win" class="count">0</div></div>
+</div>
 
-    <div class="controls">
-        <button class="reset" onclick="resetAll()">全データリセット</button>
-    </div>
+<h3>● 特定設定を除く</h3>
+<div class="neg-grid">
+    <button class="neg-btn" id="n1" onclick="toggleNeg(1)">設定1否定</button>
+    <button class="neg-btn" id="n2" onclick="toggleNeg(2)">設定2否定</button>
+    <button class="neg-btn" id="n3" onclick="toggleNeg(3)">設定3否定</button>
+    <button class="neg-btn" id="n4" onclick="toggleNeg(4)">設定4否定</button>
+    <button class="neg-btn" id="n5" onclick="toggleNeg(5)">設定5否定</button>
+    <button class="neg-btn" id="n6" onclick="toggleNeg(6)">設定6否定</button>
+</div>
 
-    <script>
-        const keys = ['normal', 'attack', 'syutsugeki', 'success'];
+<div class="help">タップで＋ / 長押しでー</div>
 
-        // 初期表示
-        function updateDisplay() {
-            keys.forEach(key => {
-                document.getElementById(key).innerText = localStorage.getItem(key) || 0;
-            });
+<div class="reset-area">
+    <button class="reset-btn" onclick="resetAll()">全データをリセット</button>
+</div>
+
+<script>
+    const keys = ['g_total', 'bonus_at', 'at_hit', 'attack_hit', 'miko_zero', 'miko_attack', 'chokugeki', 'g30', 'g40', 'g50', 'ougai_cnt', 'ougai_win'];
+
+    function up(id, step = 1) {
+        let v = parseInt(localStorage.getItem(id) || 0) + step;
+        localStorage.setItem(id, v);
+        render();
+    }
+
+    function toggleNeg(n) {
+        let k = 'neg' + n;
+        let v = localStorage.getItem(k) === 'on' ? 'off' : 'on';
+        localStorage.setItem(k, v);
+        render();
+    }
+
+    function render() {
+        keys.forEach(k => document.getElementById(k).innerText = localStorage.getItem(k) || 0);
+        for(let i=1; i<=6; i++) {
+            document.getElementById('n'+i).className = localStorage.getItem('neg'+i) === 'on' ? 'neg-btn active' : 'neg-btn';
         }
+    }
 
-        // カウントアップ
-        function countUp(key) {
-            let val = parseInt(localStorage.getItem(key) || 0);
-            localStorage.setItem(key, val + 1);
-            updateDisplay();
-            // 振動フィードバック (iPhoneは設定次第)
-            if (navigator.vibrate) navigator.vibrate(50);
+    // 長押し(コンテキストメニュー)でマイナス
+    window.oncontextmenu = function(e) {
+        e.preventDefault();
+        let card = e.target.closest('.card');
+        if (card) {
+            let id = card.querySelector('.count').id;
+            let step = (id === 'g_total') ? 10 : 1;
+            let v = Math.max(0, parseInt(localStorage.getItem(id) || 0) - step);
+            localStorage.setItem(id, v);
+            render();
         }
+    };
 
-        // カウントダウン (長押し/右クリック用)
-        function countDown(e, key) {
-            e.preventDefault();
-            let val = parseInt(localStorage.getItem(key) || 0);
-            if (val > 0) {
-                localStorage.setItem(key, val - 1);
-                updateDisplay();
-            }
+    function resetAll() {
+        if(confirm('全てのデータをリセットしますか？')) {
+            localStorage.clear();
+            render();
         }
+    }
 
-        // リセット
-        function resetAll() {
-            if (confirm('すべてのカウントをリセットしますか？')) {
-                keys.forEach(key => localStorage.setItem(key, 0));
-                updateDisplay();
-            }
-        }
-
-        updateDisplay();
-    </script>
+    render();
+</script>
 </body>
 </html>
