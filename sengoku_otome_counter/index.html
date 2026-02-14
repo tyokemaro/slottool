@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>乙女カウンター</title>
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/e91e63/ffffff?text=乙女">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-primary: #ffffff;
+            --accent: #e91e63;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 10px;
+            user-select: none; /* テキスト選択防止 */
+            -webkit-user-select: none;
+        }
+        h2 { text-align: center; color: var(--accent); margin: 10px 0; font-size: 1.2rem; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .counter-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+            active-state: scale(0.95);
+        }
+
+        .label { font-size: 0.85rem; color: #aaa; margin-bottom: 5px; height: 2.4em; display: flex; align-items: center; justify-content: center; }
+        .count { font-size: 2rem; font-weight: bold; margin: 5px 0; color: var(--text-primary); }
+        
+        /* ボタン色分け */
+        .btn-normal { border-left: 5px solid #2196f3; }
+        .btn-attack { border-left: 5px solid #ff9800; }
+        .btn-syutsugeki { border-left: 5px solid #f44336; }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button.reset {
+            background: #444;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>戦国乙女 カウンター</h2>
+
+    <div class="grid">
+        <div class="counter-card btn-normal" onclick="countUp('normal')" oncontextmenu="countDown(event, 'normal')">
+            <div class="label">通常時合計</div>
+            <div id="normal" class="count">0</div>
+        </div>
+
+        <div class="counter-card btn-attack" onclick="countUp('attack')" oncontextmenu="countDown(event, 'attack')">
+            <div class="label">乙女アタック</div>
+            <div id="attack" class="count">0</div>
+        </div>
+
+        <div class="counter-card btn-syutsugeki" onclick="countUp('syutsugeki')" oncontextmenu="countDown(event, 'syutsugeki')">
+            <div class="label">乙女出撃チャンス</div>
+            <div id="syutsugeki" class="count">0</div>
+        </div>
+
+        <div class="counter-card" style="border-left: 5px solid #4caf50;" onclick="countUp('success')" oncontextmenu="countDown(event, 'success')">
+            <div class="label">AT直撃</div>
+            <div id="success" class="count">0</div>
+        </div>
+    </div>
+
+    <div style="font-size: 0.7rem; color: #666; text-align: center;">
+        ※タップで+1 / 長押しで-1
+    </div>
+
+    <div class="controls">
+        <button class="reset" onclick="resetAll()">全データリセット</button>
+    </div>
+
+    <script>
+        const keys = ['normal', 'attack', 'syutsugeki', 'success'];
+
+        // 初期表示
+        function updateDisplay() {
+            keys.forEach(key => {
+                document.getElementById(key).innerText = localStorage.getItem(key) || 0;
+            });
+        }
+
+        // カウントアップ
+        function countUp(key) {
+            let val = parseInt(localStorage.getItem(key) || 0);
+            localStorage.setItem(key, val + 1);
+            updateDisplay();
+            // 振動フィードバック (iPhoneは設定次第)
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+
+        // カウントダウン (長押し/右クリック用)
+        function countDown(e, key) {
+            e.preventDefault();
+            let val = parseInt(localStorage.getItem(key) || 0);
+            if (val > 0) {
+                localStorage.setItem(key, val - 1);
+                updateDisplay();
+            }
+        }
+
+        // リセット
+        function resetAll() {
+            if (confirm('すべてのカウントをリセットしますか？')) {
+                keys.forEach(key => localStorage.setItem(key, 0));
+                updateDisplay();
+            }
+        }
+
+        updateDisplay();
+    </script>
+</body>
+</html>
