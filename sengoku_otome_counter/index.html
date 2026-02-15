@@ -32,4 +32,171 @@
         /* 設定否定 */
         .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
         .neg-btn { background: #2a2a2a; border: 1px solid #444; color: #888; padding: 12px 0; border-radius: 4px; font-size: 0.8rem; }
-        .neg-btn.active { background: var(--accent); color: #fff; border-color:
+        .neg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        /* 履歴リスト */
+        .history-card { background: #1a1a1a; margin-bottom: 8px; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); }
+        .del-btn { color: #444; padding: 5px 10px; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div id="page-counter" class="page active">
+    <h3>● 通常時・記録</h3>
+    <div class="grid">
+        <div class="card" onclick="up('g_total', 10)"><div class="label">通常時消化G</div><div id="g_total" class="count">0</div></div>
+        <div class="card" style="border-color: #444;"><div class="label">初当たり合計</div><div id="all_hit" class="count">0</div></div>
+    </div>
+
+    <div class="input-group">
+        <input type="number" id="winG" placeholder="G数">
+        <button class="btn" onclick="addHistory('Bonus')">ボナ記録</button>
+        <button class="btn" style="background:var(--blue)" onclick="addHistory('AT')">直撃記録</button>
+        <div style="font-size: 0.65rem; color: #999; margin-top: 8px;">※空欄なら表示中のG数で記録＆リセット</div>
+    </div>
+
+    <h3>● 巫女・アタック・オウガイ</h3>
+    <div class="grid">
+        <div class="card" onclick="up('miko_zero')"><div class="label">巫女0pt到達数</div><div id="miko_zero" class="count">0</div></div>
+        <div class="card" onclick="up('miko_hit')"><div class="label">0pt時アタック当選</div><div id="miko_hit" class="count">0</div></div>
+        <div class="card" onclick="up('attack_hit')"><div class="label">乙女アタック当選</div><div id="attack_hit" class="count">0</div></div>
+        <div class="card" onclick="up('chokugeki')"><div class="label">AT直撃(通常)</div><div id="chokugeki" class="count">0</div></div>
+        <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイバトル回数</div><div id="ougai_cnt" class="count">0</div></div>
+        <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利回数</div><div id="ougai_win" class="count">0</div></div>
+    </div>
+
+    <h3>● 設定否定</h3>
+    <div class="neg-grid">
+        <button class="neg-btn" id="n1" onclick="toggleNeg(1)">1否定</button>
+        <button class="neg-btn" id="n2" onclick="toggleNeg(2)">2否定</button>
+        <button class="neg-btn" id="n3" onclick="toggleNeg(3)">3否定</button>
+        <button class="neg-btn" id="n4" onclick="toggleNeg(4)">4否定</button>
+        <button class="neg-btn" id="n5" onclick="toggleNeg(5)">5否定</button>
+        <button class="neg-btn" id="n6" onclick="toggleNeg(6)">6否定</button>
+    </div>
+</div>
+
+<div id="page-history" class="page">
+    <h3>● 当選履歴</h3>
+    <div id="history-list"></div>
+    
+    <div style="margin-top: 50px; text-align: center;">
+        <button onclick="resetAll()" style="background:#333; color:#d32f2f; border:1px solid #d32f2f; padding:12px; border-radius:4px; font-weight:bold;">全データリセット</button>
+        <p style="font-size: 0.7rem; color: #666; margin-top: 10px;">※このボタンは全てのカウントと履歴を消去します</p>
+    </div>
+</div>
+
+<div class="nav">
+    <div id="nav-counter" class="nav-item active" onclick="showPage('counter')">
+        <div class="nav-icon">🎰</div>
+        <div>カウンター</div>
+    </div>
+    <div id="nav-history" class="nav-item" onclick="showPage('history')">
+        <div class="nav-icon">📝</div>
+        <div>履歴・設定</div>
+    </div>
+</div>
+
+<script>
+    const keys = ['g_total', 'all_hit', 'miko_zero', 'miko_hit', 'attack_hit', 'chokugeki', 'ougai_cnt', 'ougai_win'];
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        document.getElementById('nav-' + pageId).classList.add('active');
+        if(pageId === 'history') renderHistory();
+    }
+
+    function up(id, step = 1) {
+        let v = parseInt(localStorage.getItem(id) || 0) + step;
+        localStorage.setItem(id, v);
+        render();
+    }
+
+    function addHistory(type) {
+        const gField = document.getElementById('winG');
+        const currentG = document.getElementById('g_total').innerText;
+        const g = gField.value || currentG;
+        if (g === "0" && !gField.value) return;
+        
+        let logs = JSON.parse(localStorage.getItem('logs') || '[]');
+        logs.unshift({type: type, g: g, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+        localStorage.setItem('logs', JSON.stringify(logs));
+        
+        up('all_hit');
+        localStorage.setItem('g_total', 0);
+        gField.value = '';
+        render();
+        alert(g + 'Gで ' + (type === 'AT' ? '直撃' : 'ボーナス') + ' を記録しました');
+    }
+
+    function toggleNeg(n) {
+        let k = 'neg' + n;
+        let v = localStorage.getItem(k) === 'on' ? 'off' : 'on';
+        localStorage.setItem(k, v);
+        render();
+    }
+
+    function render() {
+        keys.forEach(k => {
+            const el = document.getElementById(k);
+            if(el) el.innerText = localStorage.getItem(k) || 0;
+        });
+        for(let i=1; i<=6; i++) {
+            const btn = document.getElementById('n'+i);
+            if(btn) btn.className = localStorage.getItem('neg'+i) === 'on' ? 'neg-btn active' : 'neg-btn';
+        }
+    }
+
+    function renderHistory() {
+        const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+        const html = logs.map((log, i) => `
+            <div class="history-card" style="border-color:${log.type==='AT'?'#2196f3':'#e91e63'}">
+                <div>
+                    <span style="font-weight:bold; font-size:1.2rem; color:#fff;">${log.g} G</span>
+                    <span style="font-size:0.75rem; color:#888; margin-left:10px;">${log.time}</span>
+                </div>
+                <div style="font-weight:bold; color:${log.type==='AT'?'#2196f3':'#e91e63'}">${log.type === 'AT' ? '直撃' : 'ボナ'}</div>
+                <div class="del-btn" onclick="deleteLog(${i})">✕</div>
+            </div>
+        `).join('');
+        document.getElementById('history-list').innerHTML = html || '<p style="text-align:center;color:#444;margin-top:20px;">履歴はありません</p>';
+    }
+
+    function deleteLog(index) {
+        if(!confirm('この履歴を消去しますか？')) return;
+        let logs = JSON.parse(localStorage.getItem('logs') || '[]');
+        logs.splice(index, 1);
+        localStorage.setItem('logs', JSON.stringify(logs));
+        renderHistory();
+    }
+
+    function resetAll() {
+        if(confirm('【警告】すべてのカウントと履歴を消去します。よろしいですか？')) {
+            localStorage.clear();
+            render();
+            renderHistory();
+            showPage('counter');
+        }
+    }
+
+    // 長押しでマイナス
+    window.oncontextmenu = function(e) {
+        e.preventDefault();
+        let card = e.target.closest('.card');
+        if (card) {
+            let countEl = card.querySelector('.count');
+            if (!countEl) return;
+            let id = countEl.id;
+            let step = (id === 'g_total') ? 10 : 1;
+            let v = Math.max(0, parseInt(localStorage.getItem(id) || 0) - step);
+            localStorage.setItem(id, v);
+            render();
+        }
+    };
+
+    render();
+</script>
+</body>
+</html>
