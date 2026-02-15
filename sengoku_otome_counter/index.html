@@ -8,11 +8,9 @@
         :root { --bg: #121212; --card: #1e1e1e; --accent: #e91e63; --text: #fff; --sub: #aaa; --blue: #2196f3; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-user-select: none; }
         
-        /* タブ切り替え */
-        .page { display: none; padding: 10px; padding-bottom: 80px; }
+        .page { display: none; padding: 10px; padding-bottom: 100px; }
         .page.active { display: block; }
 
-        /* ナビゲーション */
         .nav { position: fixed; bottom: 0; width: 100%; background: #222; display: flex; border-top: 1px solid #333; height: 65px; z-index: 100; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; color: #666; cursor: pointer; }
         .nav-item.active { color: var(--accent); font-weight: bold; }
@@ -24,19 +22,22 @@
         .label { font-size: 0.7rem; color: var(--sub); height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.1; }
         .count { font-size: 1.6rem; font-weight: bold; font-family: 'Courier New', monospace; }
 
-        /* 記録エリア */
         .input-group { background: #2a1018; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #4a1525; text-align: center; }
-        input[type="number"] { width: 70px; background: #000; color: #fff; border: 1px solid #666; padding: 10px; border-radius: 4px; font-size: 1.1rem; text-align: center; }
-        .btn { background: var(--accent); color: #fff; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
+        .input-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+        input[type="number"], select { background: #000; color: #fff; border: 1px solid #666; padding: 8px; border-radius: 4px; font-size: 0.9rem; }
+        input[type="number"] { width: 60px; text-align: center; }
+        select { width: 140px; }
+        .btn { background: var(--accent); color: #fff; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        /* 設定否定 */
+        .history-card { background: #1a1a1a; margin-bottom: 10px; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); position: relative; }
+        .history-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .history-sub { font-size: 0.75rem; color: #888; display: flex; flex-direction: column; gap: 4px; }
+        .res-select { width: 100%; margin-top: 8px; font-size: 0.8rem; border-color: #444; background: #222; color: #ffd700; } /* モード示唆は金色っぽく */
+        .del-btn { position: absolute; top: 5px; right: 5px; color: #444; padding: 5px; }
+
         .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
         .neg-btn { background: #2a2a2a; border: 1px solid #444; color: #888; padding: 12px 0; border-radius: 4px; font-size: 0.8rem; }
         .neg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-        /* 履歴リスト */
-        .history-card { background: #1a1a1a; margin-bottom: 8px; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--accent); }
-        .del-btn { color: #444; padding: 5px 10px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -45,14 +46,24 @@
     <h3>● 通常時・記録</h3>
     <div class="grid">
         <div class="card" onclick="up('g_total', 10)"><div class="label">通常時消化G</div><div id="g_total" class="count">0</div></div>
-        <div class="card" style="border-color: #444;"><div class="label">初当たり合計</div><div id="all_hit" class="count">0</div></div>
+        <div class="card"><div class="label">初当たり合計</div><div id="all_hit" class="count">0</div></div>
     </div>
 
     <div class="input-group">
-        <input type="number" id="winG" placeholder="G数">
-        <button class="btn" onclick="addHistory('Bonus')">ボナ記録</button>
-        <button class="btn" style="background:var(--blue)" onclick="addHistory('AT')">直撃記録</button>
-        <div style="font-size: 0.65rem; color: #999; margin-top: 8px;">※空欄なら表示中のG数で記録＆リセット</div>
+        <div class="input-row">
+            <input type="number" id="winG" placeholder="G数">
+            <select id="winReason">
+                <option value="未選択">-- 当選契機 --</option>
+                <option value="乙女アタック">乙女アタック</option>
+                <option value="ゲーム数">ゲーム数</option>
+                <option value="リールロック・レア役">リールロック・レア役</option>
+            </select>
+        </div>
+        <div class="input-row">
+            <button class="btn" onclick="addHistory('Bonus')">ボナ記録</button>
+            <button class="btn" style="background:var(--blue)" onclick="addHistory('AT')">直撃記録</button>
+        </div>
+        <div style="font-size: 0.65rem; color: #999; margin-top: 5px;">※空欄なら表示中のG数で記録＆リセット</div>
     </div>
 
     <h3>● 巫女・アタック・オウガイ</h3>
@@ -64,9 +75,14 @@
         <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイバトル回数</div><div id="ougai_cnt" class="count">0</div></div>
         <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利回数</div><div id="ougai_win" class="count">0</div></div>
     </div>
+</div>
 
+<div id="page-history" class="page">
+    <h3>● 当選履歴・モード示唆記録</h3>
+    <div id="history-list"></div>
+    
     <h3>● 設定否定</h3>
-    <div class="neg-grid">
+    <div class="neg-grid" style="margin-bottom:30px;">
         <button class="neg-btn" id="n1" onclick="toggleNeg(1)">1否定</button>
         <button class="neg-btn" id="n2" onclick="toggleNeg(2)">2否定</button>
         <button class="neg-btn" id="n3" onclick="toggleNeg(3)">3否定</button>
@@ -74,15 +90,9 @@
         <button class="neg-btn" id="n5" onclick="toggleNeg(5)">5否定</button>
         <button class="neg-btn" id="n6" onclick="toggleNeg(6)">6否定</button>
     </div>
-</div>
 
-<div id="page-history" class="page">
-    <h3>● 当選履歴</h3>
-    <div id="history-list"></div>
-    
-    <div style="margin-top: 50px; text-align: center;">
-        <button onclick="resetAll()" style="background:#333; color:#d32f2f; border:1px solid #d32f2f; padding:12px; border-radius:4px; font-weight:bold;">全データリセット</button>
-        <p style="font-size: 0.7rem; color: #666; margin-top: 10px;">※このボタンは全てのカウントと履歴を消去します</p>
+    <div style="text-align: center;">
+        <button onclick="resetAll()" style="background:#333; color:#d32f2f; border:1px solid #d32f2f; padding:10px; border-radius:4px; font-size:0.7rem;">全データリセット</button>
     </div>
 </div>
 
@@ -116,26 +126,31 @@
 
     function addHistory(type) {
         const gField = document.getElementById('winG');
-        const currentG = document.getElementById('g_total').innerText;
-        const g = gField.value || currentG;
-        if (g === "0" && !gField.value) return;
+        const reasonField = document.getElementById('winReason');
+        const g = gField.value || document.getElementById('g_total').innerText;
         
         let logs = JSON.parse(localStorage.getItem('logs') || '[]');
-        logs.unshift({type: type, g: g, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+        logs.unshift({
+            type: type, 
+            g: g, 
+            reason: reasonField.value,
+            result: '未入力', 
+            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
         localStorage.setItem('logs', JSON.stringify(logs));
         
         up('all_hit');
         localStorage.setItem('g_total', 0);
         gField.value = '';
+        reasonField.selectedIndex = 0;
         render();
-        alert(g + 'Gで ' + (type === 'AT' ? '直撃' : 'ボーナス') + ' を記録しました');
+        alert(g + 'G記録完了');
     }
 
-    function toggleNeg(n) {
-        let k = 'neg' + n;
-        let v = localStorage.getItem(k) === 'on' ? 'off' : 'on';
-        localStorage.setItem(k, v);
-        render();
+    function updateResult(index, value) {
+        let logs = JSON.parse(localStorage.getItem('logs') || '[]');
+        logs[index].result = value;
+        localStorage.setItem('logs', JSON.stringify(logs));
     }
 
     function render() {
@@ -151,44 +166,61 @@
 
     function renderHistory() {
         const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+        // ご指定のリストに更新
+        const modeResults = [
+            "未入力", 
+            "デフォルト", 
+            "通常B以上", 
+            "通常B以上、通常C期待", 
+            "通常C以上", 
+            "天国A以上", 
+            "天国A以上、天国B期待", 
+            "天国B濃厚"
+        ];
+        
         const html = logs.map((log, i) => `
             <div class="history-card" style="border-color:${log.type==='AT'?'#2196f3':'#e91e63'}">
-                <div>
-                    <span style="font-weight:bold; font-size:1.2rem; color:#fff;">${log.g} G</span>
-                    <span style="font-size:0.75rem; color:#888; margin-left:10px;">${log.time}</span>
+                <div class="history-main">
+                    <span style="font-weight:bold; font-size:1.2rem;">${log.g} G</span>
+                    <span style="font-weight:bold; color:${log.type==='AT'?'#2196f3':'#e91e63'}">${log.type==='AT'?'直撃':'ボナ'}</span>
                 </div>
-                <div style="font-weight:bold; color:${log.type==='AT'?'#2196f3':'#e91e63'}">${log.type === 'AT' ? '直撃' : 'ボナ'}</div>
+                <div class="history-sub">
+                    <span>契機: ${log.reason}</span>
+                    <span>時間: ${log.time}</span>
+                </div>
+                <select class="res-select" onchange="updateResult(${i}, this.value)">
+                    ${modeResults.map(r => `<option value="${r}" ${log.result === r ? 'selected' : ''}>終了画面: ${r}</option>`).join('')}
+                </select>
                 <div class="del-btn" onclick="deleteLog(${i})">✕</div>
             </div>
         `).join('');
-        document.getElementById('history-list').innerHTML = html || '<p style="text-align:center;color:#444;margin-top:20px;">履歴はありません</p>';
+        document.getElementById('history-list').innerHTML = html || '<p style="text-align:center;color:#444;">履歴なし</p>';
     }
 
     function deleteLog(index) {
-        if(!confirm('この履歴を消去しますか？')) return;
+        if(!confirm('削除しますか？')) return;
         let logs = JSON.parse(localStorage.getItem('logs') || '[]');
         logs.splice(index, 1);
         localStorage.setItem('logs', JSON.stringify(logs));
         renderHistory();
     }
 
-    function resetAll() {
-        if(confirm('【警告】すべてのカウントと履歴を消去します。よろしいですか？')) {
-            localStorage.clear();
-            render();
-            renderHistory();
-            showPage('counter');
-        }
+    function toggleNeg(n) {
+        let k = 'neg' + n;
+        let v = localStorage.getItem(k) === 'on' ? 'off' : 'on';
+        localStorage.setItem(k, v);
+        render();
     }
 
-    // 長押しでマイナス
+    function resetAll() {
+        if(confirm('リセットしますか？')) { localStorage.clear(); render(); renderHistory(); showPage('counter'); }
+    }
+
     window.oncontextmenu = function(e) {
         e.preventDefault();
         let card = e.target.closest('.card');
         if (card) {
-            let countEl = card.querySelector('.count');
-            if (!countEl) return;
-            let id = countEl.id;
+            let id = card.querySelector('.count').id;
             let step = (id === 'g_total') ? 10 : 1;
             let v = Math.max(0, parseInt(localStorage.getItem(id) || 0) - step);
             localStorage.setItem(id, v);
