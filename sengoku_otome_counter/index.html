@@ -32,7 +32,7 @@
         .history-card { background: #1a1a1a; margin-bottom: 10px; padding: 12px; border-radius: 8px; border-left: 4px solid var(--accent); position: relative; }
         .history-main { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .history-sub { font-size: 0.75rem; color: #888; display: flex; flex-direction: column; gap: 4px; }
-        .res-select { width: 100%; margin-top: 8px; font-size: 0.8rem; border-color: #444; background: #222; color: #ffd700; } /* モード示唆は金色っぽく */
+        .res-select { width: 100%; margin-top: 8px; font-size: 0.8rem; border-color: #444; background: #222; color: #ffd700; }
         .del-btn { position: absolute; top: 5px; right: 5px; color: #444; padding: 5px; }
 
         .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
@@ -63,7 +63,6 @@
             <button class="btn" onclick="addHistory('Bonus')">ボナ記録</button>
             <button class="btn" style="background:var(--blue)" onclick="addHistory('AT')">直撃記録</button>
         </div>
-        <div style="font-size: 0.65rem; color: #999; margin-top: 5px;">※空欄なら表示中のG数で記録＆リセット</div>
     </div>
 
     <h3>● 巫女・アタック・オウガイ</h3>
@@ -75,14 +74,9 @@
         <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイバトル回数</div><div id="ougai_cnt" class="count">0</div></div>
         <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利回数</div><div id="ougai_win" class="count">0</div></div>
     </div>
-</div>
 
-<div id="page-history" class="page">
-    <h3>● 当選履歴・モード示唆記録</h3>
-    <div id="history-list"></div>
-    
     <h3>● 設定否定</h3>
-    <div class="neg-grid" style="margin-bottom:30px;">
+    <div class="neg-grid">
         <button class="neg-btn" id="n1" onclick="toggleNeg(1)">1否定</button>
         <button class="neg-btn" id="n2" onclick="toggleNeg(2)">2否定</button>
         <button class="neg-btn" id="n3" onclick="toggleNeg(3)">3否定</button>
@@ -90,8 +84,13 @@
         <button class="neg-btn" id="n5" onclick="toggleNeg(5)">5否定</button>
         <button class="neg-btn" id="n6" onclick="toggleNeg(6)">6否定</button>
     </div>
+</div>
 
-    <div style="text-align: center;">
+<div id="page-history" class="page">
+    <h3>● 当選履歴・モード示唆記録</h3>
+    <div id="history-list"></div>
+    
+    <div style="margin-top: 50px; text-align: center;">
         <button onclick="resetAll()" style="background:#333; color:#d32f2f; border:1px solid #d32f2f; padding:10px; border-radius:4px; font-size:0.7rem;">全データリセット</button>
     </div>
 </div>
@@ -103,7 +102,7 @@
     </div>
     <div id="nav-history" class="nav-item" onclick="showPage('history')">
         <div class="nav-icon">📝</div>
-        <div>履歴・設定</div>
+        <div>履歴表示</div>
     </div>
 </div>
 
@@ -144,7 +143,7 @@
         gField.value = '';
         reasonField.selectedIndex = 0;
         render();
-        alert(g + 'G記録完了');
+        alert(g + 'G記録しました。履歴タブで終了画面をメモできます。');
     }
 
     function updateResult(index, value) {
@@ -166,17 +165,7 @@
 
     function renderHistory() {
         const logs = JSON.parse(localStorage.getItem('logs') || '[]');
-        // ご指定のリストに更新
-        const modeResults = [
-            "未入力", 
-            "デフォルト", 
-            "通常B以上", 
-            "通常B以上、通常C期待", 
-            "通常C以上", 
-            "天国A以上", 
-            "天国A以上、天国B期待", 
-            "天国B濃厚"
-        ];
+        const modeResults = ["未入力", "デフォルト", "通常B以上", "通常B以上、通常C期待", "通常C以上", "天国A以上", "天国A以上、天国B期待", "天国B濃厚"];
         
         const html = logs.map((log, i) => `
             <div class="history-card" style="border-color:${log.type==='AT'?'#2196f3':'#e91e63'}">
@@ -220,11 +209,14 @@
         e.preventDefault();
         let card = e.target.closest('.card');
         if (card) {
-            let id = card.querySelector('.count').id;
-            let step = (id === 'g_total') ? 10 : 1;
-            let v = Math.max(0, parseInt(localStorage.getItem(id) || 0) - step);
-            localStorage.setItem(id, v);
-            render();
+            let countEl = card.querySelector('.count');
+            if(countEl) {
+                let id = countEl.id;
+                let step = (id === 'g_total') ? 10 : 1;
+                let v = Math.max(0, parseInt(localStorage.getItem(id) || 0) - step);
+                localStorage.setItem(id, v);
+                render();
+            }
         }
     };
 
