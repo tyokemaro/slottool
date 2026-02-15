@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>乙女4 設定判別</title>
+    <title>乙女4 設定判別＋履歴</title>
     <style>
         :root { --bg: #121212; --card: #1e1e1e; --accent: #e91e63; --text: #fff; --sub: #aaa; }
         body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; -webkit-user-select: none; padding-bottom: 100px; }
@@ -13,74 +13,81 @@
         .card:active { background: #333; }
         .label { font-size: 0.75rem; color: var(--sub); margin-bottom: 5px; min-height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
         .count { font-size: 1.8rem; font-weight: bold; font-family: 'Courier New', monospace; }
+        
+        /* 履歴入力エリア */
+        .history-input { background: #222; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px dashed #444; }
+        input[type="number"] { width: 80px; padding: 10px; font-size: 1.2rem; background: #000; color: #fff; border: 1px solid var(--accent); border-radius: 4px; text-align: center; }
+        .log-btn { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
+        .history-list { background: #1a1a1a; padding: 10px; border-radius: 8px; margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; }
+        .history-item { border-bottom: 1px solid #333; padding: 5px 0; display: flex; justify-content: space-between; }
+
         .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
         .neg-btn { background: #2a2a2a; border: 1px solid #444; color: #888; padding: 12px 0; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
         .neg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
         .reset-area { margin-top: 40px; text-align: center; }
-        .reset-btn { background: #d32f2f; color: white; border: none; padding: 12px 24px; border-radius: 4px; font-size: 0.9rem; }
-        .help { font-size: 0.7rem; color: #666; text-align: center; margin-top: 10px; }
+        .reset-btn { background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
 <h3>● 通常時</h3>
 <div class="grid">
-    <div class="card" onclick="up('g_total', 10)"><div class="label">通常時消化ゲーム数</div><div id="g_total" class="count">0</div></div>
-    <div class="card" onclick="up('bonus_at')"><div class="label">ボーナス＋AT初当たり</div><div id="bonus_at" class="count">0</div></div>
-    <div class="card" onclick="up('at_hit')"><div class="label">AT初当たり</div><div id="at_hit" class="count">0</div></div>
+    <div class="card" onclick="up('g_total', 10)"><div class="label">現在のゲーム数</div><div id="g_total" class="count">0</div></div>
+    <div class="card" style="background: #2a1018;"><div class="label">初当たり合計</div><div id="all_hit" class="count">0</div></div>
 </div>
 
-<h3>● 乙女アタック</h3>
+<div class="history-input">
+    <span style="font-size: 0.8rem; color: #ccc;">当選G数入力:</span><br>
+    <input type="number" id="winG" placeholder="0">
+    <button class="log-btn" onclick="addHistory('Bonus')">ボナ</button>
+    <button class="log-btn" style="background:#2196f3;" onclick="addHistory('AT')">直撃</button>
+    <div class="history-list" id="history-list">
+        </div>
+</div>
+
+<h3>● 巫女・アタック・オウガイ</h3>
 <div class="grid">
-    <div class="card" onclick="up('attack_hit')"><div class="label">乙女アタック当選</div><div id="attack_hit" class="count">0</div></div>
+    <div class="card" onclick="up('miko_zero')"><div class="label">巫女0pt到達</div><div id="miko_zero" class="count">0</div></div>
+    <div class="card" onclick="up('miko_attack')"><div class="label">0pt当選</div><div id="miko_attack" class="count">0</div></div>
+    <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイ回数</div><div id="ougai_cnt" class="count">0</div></div>
+    <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利</div><div id="ougai_win" class="count">0</div></div>
 </div>
 
-<h3>● 巫女カウンター</h3>
-<div class="grid">
-    <div class="card" onclick="up('miko_zero')"><div class="label">巫女カウンター<br>0pt到達数</div><div id="miko_zero" class="count">0</div></div>
-    <div class="card" onclick="up('miko_attack')"><div class="label">0pt到達時の<br>乙女アタック当選</div><div id="miko_attack" class="count">0</div></div>
-</div>
-
-<h3>● 通常状態のAT直撃抽選</h3>
-<div class="grid">
-    <div class="card" onclick="up('chokugeki')"><div class="label">AT直撃当選<br>(超強カワループ除く)</div><div id="chokugeki" class="count">0</div></div>
-</div>
-
-<h3>● ボーナス継続G数(昇格非当選時)</h3>
-<div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-    <div class="card" onclick="up('g30')"><div class="label">30G</div><div id="g30" class="count">0</div></div>
-    <div class="card" onclick="up('g40')"><div class="label">40G</div><div id="g40" class="count">0</div></div>
-    <div class="card" onclick="up('g50')"><div class="label">50G</div><div id="g50" class="count">0</div></div>
-</div>
-
-<h3>● オウガイバトル</h3>
-<div class="grid">
-    <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイバトル回数</div><div id="ougai_cnt" class="count">0</div></div>
-    <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利回数</div><div id="ougai_win" class="count">0</div></div>
-</div>
-
-<h3>● 特定設定を除く</h3>
+<h3>● 設定否定</h3>
 <div class="neg-grid">
-    <button class="neg-btn" id="n1" onclick="toggleNeg(1)">設定1否定</button>
-    <button class="neg-btn" id="n2" onclick="toggleNeg(2)">設定2否定</button>
-    <button class="neg-btn" id="n3" onclick="toggleNeg(3)">設定3否定</button>
-    <button class="neg-btn" id="n4" onclick="toggleNeg(4)">設定4否定</button>
-    <button class="neg-btn" id="n5" onclick="toggleNeg(5)">設定5否定</button>
-    <button class="neg-btn" id="n6" onclick="toggleNeg(6)">設定6否定</button>
+    <button class="neg-btn" id="n1" onclick="toggleNeg(1)">1否定</button>
+    <button class="neg-btn" id="n2" onclick="toggleNeg(2)">2否定</button>
+    <button class="neg-btn" id="n3" onclick="toggleNeg(3)">3否定</button>
+    <button class="neg-btn" id="n4" onclick="toggleNeg(4)">4否定</button>
+    <button class="neg-btn" id="n5" onclick="toggleNeg(5)">5否定</button>
+    <button class="neg-btn" id="n6" onclick="toggleNeg(6)">6否定</button>
 </div>
-
-<div class="help">タップで＋ / 長押しでー</div>
 
 <div class="reset-area">
-    <button class="reset-btn" onclick="resetAll()">全データをリセット</button>
+    <button class="reset-btn" onclick="resetAll()">全リセット</button>
 </div>
 
 <script>
-    const keys = ['g_total', 'bonus_at', 'at_hit', 'attack_hit', 'miko_zero', 'miko_attack', 'chokugeki', 'g30', 'g40', 'g50', 'ougai_cnt', 'ougai_win'];
+    const keys = ['g_total', 'all_hit', 'miko_zero', 'miko_attack', 'ougai_cnt', 'ougai_win'];
 
     function up(id, step = 1) {
         let v = parseInt(localStorage.getItem(id) || 0) + step;
         localStorage.setItem(id, v);
+        render();
+    }
+
+    function addHistory(type) {
+        const g = document.getElementById('winG').value || document.getElementById('g_total').innerText;
+        if (g === "0") return;
+        
+        let history = JSON.parse(localStorage.getItem('history_log') || '[]');
+        history.unshift({type: type, g: g, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})});
+        localStorage.setItem('history_log', JSON.stringify(history));
+        
+        // 初当たりカウントアップとゲーム数リセット
+        up('all_hit');
+        localStorage.setItem('g_total', 0);
+        document.getElementById('winG').value = '';
         render();
     }
 
@@ -96,9 +103,18 @@
         for(let i=1; i<=6; i++) {
             document.getElementById('n'+i).className = localStorage.getItem('neg'+i) === 'on' ? 'neg-btn active' : 'neg-btn';
         }
+        
+        // 履歴の表示
+        const history = JSON.parse(localStorage.getItem('history_log') || '[]');
+        const listHtml = history.map((item, index) => `
+            <div class="history-item">
+                <span>${history.length - index}回目: ${item.g}G</span>
+                <span style="color:${item.type==='AT'?'#2196f3':'#e91e63'}">${item.type} (${item.time})</span>
+            </div>
+        `).join('');
+        document.getElementById('history-list').innerHTML = listHtml || '<div style="color:#666;text-align:center">履歴なし</div>';
     }
 
-    // 長押し(コンテキストメニュー)でマイナス
     window.oncontextmenu = function(e) {
         e.preventDefault();
         let card = e.target.closest('.card');
