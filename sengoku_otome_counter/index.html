@@ -3,138 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>乙女4 設定判別＋履歴</title>
+    <title>乙女4 設定判別アプリ</title>
     <style>
-        :root { --bg: #121212; --card: #1e1e1e; --accent: #e91e63; --text: #fff; --sub: #aaa; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; -webkit-user-select: none; padding-bottom: 100px; }
-        h3 { border-left: 4px solid var(--accent); padding-left: 10px; font-size: 1rem; margin: 20px 0 10px 0; color: #eee; }
+        :root { --bg: #121212; --card: #1e1e1e; --accent: #e91e63; --text: #fff; --sub: #aaa; --blue: #2196f3; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-user-select: none; }
+        
+        /* タブ切り替え */
+        .page { display: none; padding: 10px; padding-bottom: 80px; }
+        .page.active { display: block; }
+
+        /* ナビゲーション */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #222; display: flex; border-top: 1px solid #333; height: 65px; z-index: 100; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; color: #666; cursor: pointer; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
+
+        h3 { border-left: 4px solid var(--accent); padding-left: 10px; font-size: 1rem; margin: 15px 0 10px 0; color: #eee; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .card { background: var(--card); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid #333; cursor: pointer; }
-        .card:active { background: #333; }
-        .label { font-size: 0.75rem; color: var(--sub); margin-bottom: 5px; min-height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
-        .count { font-size: 1.8rem; font-weight: bold; font-family: 'Courier New', monospace; }
-        
-        /* 履歴入力エリア */
-        .history-input { background: #222; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px dashed #444; }
-        input[type="number"] { width: 80px; padding: 10px; font-size: 1.2rem; background: #000; color: #fff; border: 1px solid var(--accent); border-radius: 4px; text-align: center; }
-        .log-btn { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
-        .history-list { background: #1a1a1a; padding: 10px; border-radius: 8px; margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 0.9rem; }
-        .history-item { border-bottom: 1px solid #333; padding: 5px 0; display: flex; justify-content: space-between; }
+        .card { background: var(--card); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid #333; }
+        .label { font-size: 0.7rem; color: var(--sub); height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.1; }
+        .count { font-size: 1.6rem; font-weight: bold; font-family: 'Courier New', monospace; }
 
-        .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-        .neg-btn { background: #2a2a2a; border: 1px solid #444; color: #888; padding: 12px 0; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-        .neg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .reset-area { margin-top: 40px; text-align: center; }
-        .reset-btn { background: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 0.8rem; }
-    </style>
-</head>
-<body>
+        /* 記録エリア */
+        .input-group { background: #2a1018; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #4a1525; text-align: center; }
+        input[type="number"] { width: 70px; background: #000; color: #fff; border: 1px solid #666; padding: 10px; border-radius: 4px; font-size: 1.1rem; text-align: center; }
+        .btn { background: var(--accent); color: #fff; border: none; padding: 10px 15px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
 
-<h3>● 通常時</h3>
-<div class="grid">
-    <div class="card" onclick="up('g_total', 10)"><div class="label">現在のゲーム数</div><div id="g_total" class="count">0</div></div>
-    <div class="card" style="background: #2a1018;"><div class="label">初当たり合計</div><div id="all_hit" class="count">0</div></div>
-</div>
-
-<div class="history-input">
-    <span style="font-size: 0.8rem; color: #ccc;">当選G数入力:</span><br>
-    <input type="number" id="winG" placeholder="0">
-    <button class="log-btn" onclick="addHistory('Bonus')">ボナ</button>
-    <button class="log-btn" style="background:#2196f3;" onclick="addHistory('AT')">直撃</button>
-    <div class="history-list" id="history-list">
-        </div>
-</div>
-
-<h3>● 巫女・アタック・オウガイ</h3>
-<div class="grid">
-    <div class="card" onclick="up('miko_zero')"><div class="label">巫女0pt到達</div><div id="miko_zero" class="count">0</div></div>
-    <div class="card" onclick="up('miko_attack')"><div class="label">0pt当選</div><div id="miko_attack" class="count">0</div></div>
-    <div class="card" onclick="up('ougai_cnt')"><div class="label">オウガイ回数</div><div id="ougai_cnt" class="count">0</div></div>
-    <div class="card" onclick="up('ougai_win')"><div class="label">初戦勝利</div><div id="ougai_win" class="count">0</div></div>
-</div>
-
-<h3>● 設定否定</h3>
-<div class="neg-grid">
-    <button class="neg-btn" id="n1" onclick="toggleNeg(1)">1否定</button>
-    <button class="neg-btn" id="n2" onclick="toggleNeg(2)">2否定</button>
-    <button class="neg-btn" id="n3" onclick="toggleNeg(3)">3否定</button>
-    <button class="neg-btn" id="n4" onclick="toggleNeg(4)">4否定</button>
-    <button class="neg-btn" id="n5" onclick="toggleNeg(5)">5否定</button>
-    <button class="neg-btn" id="n6" onclick="toggleNeg(6)">6否定</button>
-</div>
-
-<div class="reset-area">
-    <button class="reset-btn" onclick="resetAll()">全リセット</button>
-</div>
-
-<script>
-    const keys = ['g_total', 'all_hit', 'miko_zero', 'miko_attack', 'ougai_cnt', 'ougai_win'];
-
-    function up(id, step = 1) {
-        let v = parseInt(localStorage.getItem(id) || 0) + step;
-        localStorage.setItem(id, v);
-        render();
-    }
-
-    function addHistory(type) {
-        const g = document.getElementById('winG').value || document.getElementById('g_total').innerText;
-        if (g === "0") return;
-        
-        let history = JSON.parse(localStorage.getItem('history_log') || '[]');
-        history.unshift({type: type, g: g, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})});
-        localStorage.setItem('history_log', JSON.stringify(history));
-        
-        // 初当たりカウントアップとゲーム数リセット
-        up('all_hit');
-        localStorage.setItem('g_total', 0);
-        document.getElementById('winG').value = '';
-        render();
-    }
-
-    function toggleNeg(n) {
-        let k = 'neg' + n;
-        let v = localStorage.getItem(k) === 'on' ? 'off' : 'on';
-        localStorage.setItem(k, v);
-        render();
-    }
-
-    function render() {
-        keys.forEach(k => document.getElementById(k).innerText = localStorage.getItem(k) || 0);
-        for(let i=1; i<=6; i++) {
-            document.getElementById('n'+i).className = localStorage.getItem('neg'+i) === 'on' ? 'neg-btn active' : 'neg-btn';
-        }
-        
-        // 履歴の表示
-        const history = JSON.parse(localStorage.getItem('history_log') || '[]');
-        const listHtml = history.map((item, index) => `
-            <div class="history-item">
-                <span>${history.length - index}回目: ${item.g}G</span>
-                <span style="color:${item.type==='AT'?'#2196f3':'#e91e63'}">${item.type} (${item.time})</span>
-            </div>
-        `).join('');
-        document.getElementById('history-list').innerHTML = listHtml || '<div style="color:#666;text-align:center">履歴なし</div>';
-    }
-
-    window.oncontextmenu = function(e) {
-        e.preventDefault();
-        let card = e.target.closest('.card');
-        if (card) {
-            let id = card.querySelector('.count').id;
-            let step = (id === 'g_total') ? 10 : 1;
-            let v = Math.max(0, parseInt(localStorage.getItem(id) || 0) - step);
-            localStorage.setItem(id, v);
-            render();
-        }
-    };
-
-    function resetAll() {
-        if(confirm('全てのデータをリセットしますか？')) {
-            localStorage.clear();
-            render();
-        }
-    }
-
-    render();
-</script>
-</body>
-</html>
+        /* 設定否定 */
+        .neg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
+        .neg-btn { background: #2a2a2a; border: 1px solid #444; color: #888; padding: 12px 0; border-radius: 4px; font-size: 0.8rem; }
+        .neg-btn.active { background: var(--accent); color: #fff; border-color:
